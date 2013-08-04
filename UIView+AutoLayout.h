@@ -24,8 +24,14 @@ typedef NS_OPTIONS(unsigned long, JRTViewPinEdges){
 -(NSArray *)centerInView:(UIView*)superview;
 -(NSLayoutConstraint *)centerInContainerOnAxis:(NSLayoutAttribute)axis;
 
-// Pin an attribute to the same attribute on another view. Both views must be in the same view hierarchy
+/// Pin an attribute to the same attribute on another view. Both views must be in the same view hierarchy
 -(NSLayoutConstraint *)pinAttribute:(NSLayoutAttribute)attribute toSameAttributeOfView:(UIView *)peerView;
+
+/// Pin an attribute to the same attribute on another view along with a multiplier. Both views must be in the same view hierarchy
+-(NSLayoutConstraint *)pinAttribute:(NSLayoutAttribute)attribute toSameAttributeOfView:(UIView *)peerView withMultiplier:(CGFloat)multiplier;
+
+/// Pin an attribute to the same attribute on another view along with a constant. Both views must be in the same view hierarchy
+-(NSLayoutConstraint *)pinAttribute:(NSLayoutAttribute)attribute toSameAttributeOfView:(UIView *)peerView withConstant:(CGFloat)constant;
 
 /// Pins a view to a specific edge(s) of its superview, with a specified inset
 -(NSArray*)pinToSuperviewEdges:(JRTViewPinEdges)edges inset:(CGFloat)inset;
@@ -46,4 +52,6 @@ typedef NS_OPTIONS(unsigned long, JRTViewPinEdges){
 /// Spaces the views evenly along the selected axis. Will force the views to the same size to make them fit
 -(void)spaceViews:(NSArray*)views onAxis:(UILayoutConstraintAxis)axis withSpacing:(CGFloat)spacing alignmentOptions:(NSLayoutFormatOptions)options;
 
+/// Spaces the views evenly along the selected axis. Will force the views to the same size to make them fit within the view and inset.
+-(void)spaceViews:(NSArray*)views onAxis:(UILayoutConstraintAxis)axis withSpacing:(CGFloat)spacing withInset:(CGFloat)inset alignmentOptions:(NSLayoutFormatOptions)options;
 @end

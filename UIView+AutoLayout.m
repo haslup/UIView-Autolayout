@@ -51,6 +51,28 @@
     return constraint;
 }
 
+-(NSLayoutConstraint *)pinAttribute:(NSLayoutAttribute)attribute toSameAttributeOfView:(UIView *)peerView withMultiplier:(CGFloat)multiplier;
+{
+    NSParameterAssert(peerView);
+    UIView *superview = [self commonSuperviewWithView:peerView];
+    NSAssert(superview,@"Can't create constraints without a common superview");
+    
+    NSLayoutConstraint *constraint = [NSLayoutConstraint constraintWithItem:self attribute:attribute relatedBy:NSLayoutRelationEqual toItem:peerView attribute:attribute multiplier:multiplier constant:0.0];
+    [superview addConstraint:constraint];
+    return constraint;
+}
+
+-(NSLayoutConstraint *)pinAttribute:(NSLayoutAttribute)attribute toSameAttributeOfView:(UIView *)peerView withConstant:(CGFloat)constant;
+{
+    NSParameterAssert(peerView);
+    UIView *superview = [self commonSuperviewWithView:peerView];
+    NSAssert(superview,@"Can't create constraints without a common superview");
+    
+    NSLayoutConstraint *constraint = [NSLayoutConstraint constraintWithItem:self attribute:attribute relatedBy:NSLayoutRelationEqual toItem:peerView attribute:attribute multiplier:1.0 constant:constant];
+    [superview addConstraint:constraint];
+    return constraint;
+}
+
 -(NSArray*)pinToSuperviewEdges:(JRTViewPinEdges)edges inset:(CGFloat)inset
 {
     UIView *superview = self.superview;
@@ -142,6 +164,48 @@
         [superview addConstraint:[NSLayoutConstraint constraintWithItem:self attribute:y relatedBy:NSLayoutRelationEqual toItem:superview attribute:NSLayoutAttributeTop multiplier:1.0 constant:point.y]];
     
 }
+
+-(void)spaceViews:(NSArray*)views onAxis:(UILayoutConstraintAxis)axis withSpacing:(CGFloat)spacing withInset:(CGFloat)inset alignmentOptions:(NSLayoutFormatOptions)options;
+{
+    NSAssert([views count] > 1,@"Can only distribute 2 or more views");
+    NSString *direction = nil;
+    switch (axis) {
+        case UILayoutConstraintAxisHorizontal:
+            direction = @"H:";
+            break;
+        case UILayoutConstraintAxisVertical:
+            direction = @"V:";
+            break;
+        default:
+            return;
+    }
+    
+    UIView *previousView = nil;
+    NSDictionary *metrics = @{@"spacing":@(spacing),@"inset":@(inset)};
+    NSString *vfl = nil;
+    for (UIView *view in views)
+    {
+        vfl = nil;
+        NSDictionary *views = nil;
+        if (previousView)
+        {
+            vfl = [NSString stringWithFormat:@"%@[previousView(==view)]-spacing-[view]",direction];
+            views = NSDictionaryOfVariableBindings(previousView,view);
+        }
+        else
+        {
+            vfl = [NSString stringWithFormat:@"%@|-inset-[view]",direction];
+            views = NSDictionaryOfVariableBindings(view);
+        }
+        
+        [self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:vfl options:options metrics:metrics views:views]];
+        previousView = view;
+    }
+    
+    vfl = [NSString stringWithFormat:@"%@[previousView]-inset-|",direction];
+    [self addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:vfl options:options metrics:metrics views:NSDictionaryOfVariableBindings(previousView)]];
+}
+
 
 -(void)spaceViews:(NSArray*)views onAxis:(UILayoutConstraintAxis)axis withSpacing:(CGFloat)spacing alignmentOptions:(NSLayoutFormatOptions)options;
 {
